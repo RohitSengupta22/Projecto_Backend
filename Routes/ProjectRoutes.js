@@ -199,14 +199,7 @@ router.post('/removeUser/:projectId', fetchUser, async (req, res) => { //remove 
                     }
                 });
 
-                // project.AccessedBy.filter((elem) =>{
-                //     if(elem.Email!==Email){
-                //         return elem
-                //     }
-                // })
-
-                // await project.save()
-
+                
                 await User.findByIdAndUpdate(user._id, { $pull: { RoProjects: projectId } }, { new: true })
                 await Project.findByIdAndUpdate(projectId, { $pull: { AccessedBy: { Email: Email } } }, { new: true });
             }
@@ -421,5 +414,27 @@ router.delete('/project/:projectId/:storyId', fetchUser, async (req, res) => { /
 
 
 })
+
+router.get('/story/:projectId/:storyId', async (req, res) => { // fetch a story using its ID
+    try {
+        const projectId = req.params.projectId;
+        const storyId = req.params.storyId;
+        const projects = await Project.findById(projectId);
+
+        for (let story of projects.Data) {
+            if (story._id == storyId) {
+                res.status(200).json({ story });
+                return; // exit the loop once the story is found
+            }
+        }
+
+        // If the loop completes without finding the story
+        res.status(404).json({ error: "Story not found" });
+    } catch (e) {
+        console.log(e.message);
+        res.status(500).json({ error: e.message });
+    }
+});
+
 
 module.exports = router;
