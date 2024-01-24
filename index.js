@@ -16,7 +16,7 @@ app.use('/api',userRoutes)
 app.use('/api',projectRoutes)
 
 app.get('/', (req, res) => {
-  res.send('Hello World!')
+  res.send('Welcome To Projecto App')
 })
 
 app.listen(port, () => {

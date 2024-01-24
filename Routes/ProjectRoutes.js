@@ -363,12 +363,12 @@ router.patch('/project/:projectId/:storyId', fetchUser, async (req, res) => { //
             project.Data[index].Classification = Classification || project.Data[index].Classification;
             project.Data[index].Status = Status || project.Data[index].Status;
             project.Data[index].Priority = Priority || project.Data[index].Priority;
-
+            const story = project.Data[index]
 
 
             await project.save()
 
-            res.status(200).json({ project })
+            res.status(200).json({ story })
 
         } catch (e) {
 
@@ -435,6 +435,86 @@ router.get('/story/:projectId/:storyId', async (req, res) => { // fetch a story 
         res.status(500).json({ error: e.message });
     }
 });
+
+router.get('/admin/:projectId', async (req, res) => {
+    try {
+        // Extract projectId from the request parameters
+        const projectId = req.params.projectId;
+
+        // Find the project using the provided projectId and populate the 'Admin' field
+        const project = await Project.findById(projectId).populate('Admin');
+
+        // Check if the project exists
+        if (!project) {
+            return res.status(404).json({ error: "Project not found" });
+        }
+
+        // Extract admin details from the populated 'Admin' field
+        const admin = project.Admin;
+
+        // Check if admin details are available
+        if (!admin) {
+            return res.status(404).json({ error: "Admin not found for the project" });
+        }
+
+        // Return the admin details
+        res.status(200).json({ project });
+    } catch (e) {
+        console.log(e);
+        res.status(500).json({ error: e.message });
+    }
+});
+
+router.get('/created/:userId', async (req, res) => {
+    try {
+        // Extract userId from the request parameters
+        const userId = req.params.userId;
+
+        // Find the user using the provided userId and populate the 'CreatedProjects' field
+        const user = await User.findById(userId).populate('CreatedProjects');
+
+        // Check if the user exists
+        if (!user) {
+            return res.status(404).json({ error: "User not found" });
+        }
+
+        // Extract created projects details from the populated 'CreatedProjects' field
+        const createdProjects = user.CreatedProjects;
+
+        // Return the created projects details
+        res.status(200).json({ createdProjects });
+    } catch (e) {
+        console.log(e);
+        res.status(500).json({ error: e.message });
+    }
+});
+
+router.get('/roprojects',fetchUser, async (req, res) => { // fetch Read only projects
+    try {
+        // Extract userId from the request parameters
+        const userId = req.id;
+
+        // Find the user using the provided userId and populate the 'CreatedProjects' field
+        const user = await User.findById(userId).populate('RoProjects');
+
+        // Check if the user exists
+        if (!user) {
+            return res.status(404).json({ error: "User not found" });
+        }
+
+        // Extract created projects details from the populated 'CreatedProjects' field
+       
+
+        // Return the created projects details
+        res.status(200).json({ user });
+    } catch (e) {
+        console.log(e);
+        res.status(500).json({ error: e.message });
+    }
+});
+
+
+
 
 
 module.exports = router;
