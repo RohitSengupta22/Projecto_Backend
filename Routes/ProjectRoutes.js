@@ -158,7 +158,7 @@ router.post('/removeUser/:projectId', fetchUser, async (req, res) => { //remove 
     const contributor = await User.find({Email})
     const contributorName = contributor.Name
 
-    if (loggedInUser == project.Admin) {
+    if (!project.Data.some((story) => story.Developer== Email)) {
 
         try {
            
@@ -211,8 +211,8 @@ router.post('/removeUser/:projectId', fetchUser, async (req, res) => { //remove 
             res.status(500).json({ error: e.message });
         }
 
-    } else {
-        res.status(400).send("You are not the project admin, hence cannot remove contributors")
+    } else{
+        res.status(200).send("You cannot remove this contributor as he/she is already assigned to a story")
     }
 
 
@@ -347,9 +347,9 @@ router.delete('/project/:projectId', fetchUser, async (req, res) => { //delete p
 router.patch('/project/:projectId/:storyId', fetchUser, async (req, res) => { //edit project story
     const projectId = req.params.projectId;
     const project = await Project.findById(projectId);
-    const loggedInUser = req.id;
+    
 
-    if (loggedInUser == project.Admin) {
+   
         try {
 
             const storyId = req.params.storyId
@@ -374,9 +374,7 @@ router.patch('/project/:projectId/:storyId', fetchUser, async (req, res) => { //
 
             res.status(500).json({ error: e.message });
         }
-    } else {
-        res.status(400).send("You are not the project admin, hence cannot edit story details")
-    }
+    
 
 
 })
