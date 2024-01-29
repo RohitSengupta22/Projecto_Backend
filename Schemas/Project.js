@@ -2,6 +2,13 @@ const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
 
+const commentSchema = new Schema({
+    user: String,
+    commentText: String,
+    DateTime: String
+})
+
+
 const dataSchecma = new Schema({
     Project: String,
     Priority: {
@@ -13,6 +20,8 @@ const dataSchecma = new Schema({
     Description: String,
     Developer: String,
     Classification: String,
+    Comments : [commentSchema],
+
     Status: {
         type: String,
         default: "Not Started"

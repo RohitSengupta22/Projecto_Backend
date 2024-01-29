@@ -43,14 +43,14 @@ router.get('/projects', fetchUser, async (req, res) => { // fetch projects creat
     }
 });
 
-router.get('/project/:id',async(req,res) =>{ // fetch a project details using its projectId
-    try{
+router.get('/project/:id', async (req, res) => { // fetch a project details using its projectId
+    try {
 
         const projectId = req.params.id;
         const project = await Project.findById(projectId)
-        res.status(200).json({project})
+        res.status(200).json({ project })
 
-    }catch(e){
+    } catch (e) {
         res.status(500).json({ error: e.message });
     }
 })
@@ -62,18 +62,18 @@ router.post('/addUser/:projectId', fetchUser, async (req, res) => { //Add contri
     const user = await User.findById(loggedInUser)
     const userEmail = user.Email;
     const { Email } = req.body;
-    const contributor = await User.findOne({Email})
+    const contributor = await User.findOne({ Email })
     const contributorName = contributor ? contributor.Name : null;
 
-    if(!contributor){
+    if (!contributor) {
         res.status(200).send("No such user found in the Projecto App")
     }
 
 
-    if (userEmail!==Email && contributor.RoProjects.includes(projectId)===false) {
+    if (userEmail !== Email && contributor.RoProjects.includes(projectId) === false) {
 
         try {
-            
+
 
             const user = await User.findOne({ Email });
 
@@ -142,11 +142,11 @@ router.post('/addUser/:projectId', fetchUser, async (req, res) => { //Add contri
 
 
 
-router.get('/stories/:projectId',fetchUser,async(req,res) =>{ //fetch stories for a project
+router.get('/stories/:projectId', fetchUser, async (req, res) => { //fetch stories for a project
     const projectId = req.params.projectId;
     const projects = await Project.findById(projectId)
     const stories = projects.Data
-    res.status(200).json({stories})
+    res.status(200).json({ stories })
 
 })
 
@@ -155,13 +155,13 @@ router.post('/removeUser/:projectId', fetchUser, async (req, res) => { //remove 
     const project = await Project.findById(projectId);
     const loggedInUser = req.id;
     const { Email } = req.body;
-    const contributor = await User.find({Email})
+    const contributor = await User.find({ Email })
     const contributorName = contributor.Name
 
-    if (!project.Data.some((story) => story.Developer== Email)) {
+    if (!project.Data.some((story) => story.Developer == Email)) {
 
         try {
-           
+
 
             const user = await User.findOne({ Email });
 
@@ -199,7 +199,7 @@ router.post('/removeUser/:projectId', fetchUser, async (req, res) => { //remove 
                     }
                 });
 
-                
+
                 await User.findByIdAndUpdate(user._id, { $pull: { RoProjects: projectId } }, { new: true })
                 await Project.findByIdAndUpdate(projectId, { $pull: { AccessedBy: { Email: Email } } }, { new: true });
             }
@@ -211,7 +211,7 @@ router.post('/removeUser/:projectId', fetchUser, async (req, res) => { //remove 
             res.status(500).json({ error: e.message });
         }
 
-    } else{
+    } else {
         res.status(200).send("You cannot remove this contributor as he/she is already assigned to a story")
     }
 
@@ -224,7 +224,7 @@ router.get('/addedprojects', fetchUser, async (req, res) => { // fetch projects 
         const user = await User.findById(userId);
         const addedProjectsIds = user.RoProjects;
         const addedProjects = await Project.find({ _id: { $in: addedProjectsIds } });
-    
+
         if (addedProjects.length === 0) {
             res.status(200).send("You are not added to any project yet");
         } else {
@@ -321,14 +321,14 @@ router.delete('/project/:projectId', fetchUser, async (req, res) => { //delete p
     if (loggedInUser == project.Admin) {
         try {
 
-           const savedProjects= await Project.findByIdAndDelete(projectId)
-            await User.findByIdAndUpdate(loggedInUser,{$pull: {CreatedProjects: projectId}},{ new: true })
+            const savedProjects = await Project.findByIdAndDelete(projectId)
+            await User.findByIdAndUpdate(loggedInUser, { $pull: { CreatedProjects: projectId } }, { new: true })
             await User.updateMany(
                 { RoProjects: projectId },
                 { $pull: { RoProjects: projectId } },
                 { new: true }
             );
-            res.status(200).json({savedProjects})
+            res.status(200).json({ savedProjects })
 
 
         } catch (e) {
@@ -347,34 +347,34 @@ router.delete('/project/:projectId', fetchUser, async (req, res) => { //delete p
 router.patch('/project/:projectId/:storyId', fetchUser, async (req, res) => { //edit project story
     const projectId = req.params.projectId;
     const project = await Project.findById(projectId);
-    
-
-   
-        try {
-
-            const storyId = req.params.storyId
-            const index = project.Data.findIndex((story) => story._id == storyId)
-            const { Title, Description, Developer, Classification, Status, Priority } = req.body;
 
 
-            project.Data[index].Title = Title || project.Data[index].Title;
-            project.Data[index].Description = Description || project.Data[index].Description;
-            project.Data[index].Developer = Developer || project.Data[index].Developer;
-            project.Data[index].Classification = Classification || project.Data[index].Classification;
-            project.Data[index].Status = Status || project.Data[index].Status;
-            project.Data[index].Priority = Priority || project.Data[index].Priority;
-            const story = project.Data[index]
+
+    try {
+
+        const storyId = req.params.storyId
+        const index = project.Data.findIndex((story) => story._id == storyId)
+        const { Title, Description, Developer, Classification, Status, Priority } = req.body;
 
 
-            await project.save()
+        project.Data[index].Title = Title || project.Data[index].Title;
+        project.Data[index].Description = Description || project.Data[index].Description;
+        project.Data[index].Developer = Developer || project.Data[index].Developer;
+        project.Data[index].Classification = Classification || project.Data[index].Classification;
+        project.Data[index].Status = Status || project.Data[index].Status;
+        project.Data[index].Priority = Priority || project.Data[index].Priority;
+        const story = project.Data[index]
 
-            res.status(200).json({ story })
 
-        } catch (e) {
+        await project.save()
 
-            res.status(500).json({ error: e.message });
-        }
-    
+        res.status(200).json({ story })
+
+    } catch (e) {
+
+        res.status(500).json({ error: e.message });
+    }
+
 
 
 })
@@ -388,8 +388,8 @@ router.delete('/project/:projectId/:storyId', fetchUser, async (req, res) => { /
         try {
 
             const storyId = req.params.storyId
-           
-            
+
+
             const updatedProject = await Project.findByIdAndUpdate(
                 projectId,
                 { $pull: { Data: { _id: storyId } } },
@@ -398,7 +398,7 @@ router.delete('/project/:projectId/:storyId', fetchUser, async (req, res) => { /
 
             await updatedProject.save();
 
-           
+
 
             res.status(200).json({ updatedProject })
 
@@ -433,6 +433,98 @@ router.get('/story/:projectId/:storyId', async (req, res) => { // fetch a story 
         res.status(500).json({ error: e.message });
     }
 });
+
+router.post('/comment/:projectId/:storyId', fetchUser, async (req, res) => { //create a comment in a story
+    try {
+
+        const userId = req.id;
+        const user = await User.findById(userId)
+        const username = user.Email
+        const projectId = req.params.projectId;
+        const project = await Project.findById(projectId);
+        const storyId = req.params.storyId;
+        const { comment } = req.body;
+        if (!project) {
+            return res.status(404).json({ error: "Project not found" });
+        }
+        
+        const story = project.Data.find((story) => {
+            if (story._id == storyId) {
+                return story;
+            }
+        });
+        
+        // Check if the story exists
+        if (!story) {
+            return res.status(404).json({ error: "Story not found" });
+        }
+
+        const currentDateTime = new Date();
+        const year = currentDateTime.getFullYear();
+        const month = currentDateTime.getMonth() + 1; // Note: Month is zero-based, so we add 1
+        const day = currentDateTime.getDate();
+        const hours = currentDateTime.getHours();
+        const minutes = currentDateTime.getMinutes();
+        const seconds = currentDateTime.getSeconds();
+
+      
+
+
+        story.Comments.push({
+            user: username,
+            commentText: comment,
+            DateTime: `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`
+
+        })
+
+        await project.save()
+        res.status(200).json({story})
+
+
+
+    } catch (e) {
+        console.log(e.message);
+        res.status(500).json({ error: e.message });
+    }
+})
+
+router.delete('/comment/:projectId/:storyId/:commentId', fetchUser, async (req, res) => {
+    try {
+        const userId = req.id;
+        const projectId = req.params.projectId;
+        const storyId = req.params.storyId;
+        const commentId = req.params.commentId;
+
+        // Find the project using the provided projectId
+        const project = await Project.findById(projectId);
+
+        // Check if the project exists
+        if (!project) {
+            return res.status(404).json({ error: "Project not found" });
+        }
+
+        // Find the story within the project
+        const story = project.Data.find((story) => story._id == storyId);
+
+        // Check if the story exists
+        if (!story) {
+            return res.status(404).json({ error: "Story not found" });
+        }
+
+        // Filter out the comment based on commentId
+        story.Comments = story.Comments.filter((comment) => comment._id != commentId);
+
+        // Save the updated project
+        await project.save();
+
+        // Respond with the updated story
+        res.status(200).json({ story });
+    } catch (e) {
+        console.log(e.message);
+        res.status(500).json({ error: e.message });
+    }
+});
+
 
 router.get('/admin/:projectId', async (req, res) => {
     try {
@@ -487,7 +579,7 @@ router.get('/created/:userId', async (req, res) => {
     }
 });
 
-router.get('/roprojects',fetchUser, async (req, res) => { // fetch Read only projects
+router.get('/roprojects', fetchUser, async (req, res) => { // fetch Read only projects
     try {
         // Extract userId from the request parameters
         const userId = req.id;
@@ -501,7 +593,7 @@ router.get('/roprojects',fetchUser, async (req, res) => { // fetch Read only pro
         }
 
         // Extract created projects details from the populated 'CreatedProjects' field
-       
+
 
         // Return the created projects details
         res.status(200).json({ user });
