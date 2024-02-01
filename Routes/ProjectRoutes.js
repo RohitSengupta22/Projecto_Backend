@@ -354,7 +354,7 @@ router.patch('/project/:projectId/:storyId', fetchUser, async (req, res) => { //
 
         const storyId = req.params.storyId
         const index = project.Data.findIndex((story) => story._id == storyId)
-        const { Title, Description, Developer, Classification, Status, Priority } = req.body;
+        const { Title, Description, Developer, Classification, Status, Priority,Deadline } = req.body;
 
 
         project.Data[index].Title = Title || project.Data[index].Title;
@@ -363,6 +363,7 @@ router.patch('/project/:projectId/:storyId', fetchUser, async (req, res) => { //
         project.Data[index].Classification = Classification || project.Data[index].Classification;
         project.Data[index].Status = Status || project.Data[index].Status;
         project.Data[index].Priority = Priority || project.Data[index].Priority;
+        project.Data[index].Deadline = Deadline || project.Data[index].Deadline;
         const story = project.Data[index]
 
 
@@ -603,6 +604,7 @@ router.get('/roprojects', fetchUser, async (req, res) => { // fetch Read only pr
     }
 });
 
+router.get('/')
 
 
 
